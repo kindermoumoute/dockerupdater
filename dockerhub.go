@@ -41,7 +41,6 @@ type DockerHub struct {
 
 func (s *server) updateContainer() {
 	for imageName := range s.updates {
-
 		creds := types.AuthConfig{
 			Username:      username,
 			Password:      password,
@@ -52,9 +51,11 @@ func (s *server) updateContainer() {
 			log.Infoln("Wrong auth", err)
 			continue
 		}
-
+		priviledgedFunc := func() (string, error) {
+			return auth.IdentityToken, nil
+		}
 		s.cli.ImagePull(context.Background(), imageName, types.ImagePullOptions{
-			RegistryAuth: auth.IdentityToken,
+			PrivilegeFunc: priviledgedFunc,
 		})
 
 		containers, err := s.cli.ContainerList(context.Background(), types.ContainerListOptions{})
